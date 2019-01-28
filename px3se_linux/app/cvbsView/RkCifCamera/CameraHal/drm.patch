@@ -1,0 +1,174 @@
+diff --git a/CameraHal10_Release/CameraHal/HAL/Android.mk b/CameraHal10_Release/CameraHal/HAL/Android.mk
+index cef23cf..d0e8fac 100644
+--- a/CameraHal10_Release/CameraHal/HAL/Android.mk
++++ b/CameraHal10_Release/CameraHal/HAL/Android.mk
+@@ -60,6 +60,10 @@ ifeq ($(IS_SUPPORT_ION),true)
+ LOCAL_SRC_FILES += source/IonCameraBuffer.cpp
+ endif
+ 
++ifeq ($(IS_SUPPORT_DRM),true)
++LOCAL_SRC_FILES += source/DrmCameraBuffer.cpp
++endif
++
+ LOCAL_C_INCLUDES += \
+         $(LOCAL_PATH)/include\
+ 	$(LOCAL_PATH)/include_private\
+diff --git a/CameraHal10_Release/CameraHal/Makefile b/CameraHal10_Release/CameraHal/Makefile
+index bcc81e8..c549099 100644
+--- a/CameraHal10_Release/CameraHal/Makefile
++++ b/CameraHal10_Release/CameraHal/Makefile
+@@ -14,11 +14,13 @@ export  IS_NEED_COMPILE_STLPORT
+ export  IS_NEED_LINK_STLPORT
+ export  IS_NEED_COMPILE_TINYXML2
+ export  IS_NEED_COMPILE_EXPAT
+-export  IS_SUPPORT_ION
++#export  IS_SUPPORT_ION
++export IS_SUPPORT_DRM
+ export  IS_BUILD_TEST_APP
+ export	IS_CAM_IA10_API
+ export	IS_RK_ISP10
+ export  IS_USE_RK_V4L2_HEAD
++export  IS_BUILD_TEST_APP
+ 
+ SUBDIRS ?=
+ 
+diff --git a/CameraHal10_Release/CameraHal/productConfigs.mk b/CameraHal10_Release/CameraHal/productConfigs.mk
+index bb15d5c..2333186 100644
+--- a/CameraHal10_Release/CameraHal/productConfigs.mk
++++ b/CameraHal10_Release/CameraHal/productConfigs.mk
+@@ -4,13 +4,13 @@ IS_NEED_COMPILE_STLPORT = false
+ IS_NEED_LINK_STLPORT = false
+ IS_NEED_COMPILE_TINYXML2 = true
+ IS_NEED_COMPILE_EXPAT = true
+-IS_SUPPORT_ION = true
++#IS_SUPPORT_ION = true
+ IS_BUILD_TEST_APP = true
+ IS_CAM_IA10_API = false
+ IS_RK_ISP10 = false
+ IS_USE_RK_V4L2_HEAD = true
+ BUILD_OUPUT_EXTERNAL_LIBS:=$(CURDIR)/../../../../out/system/lib/
+-CROSS_COMPILE ?= $(CURDIR)/../../../../prebuilts/toolschain/usr/bin/arm-linux-
++CROSS_COMPILE ?= $(CURDIR)/../../../../buildroot/output/host/usr/bin/arm-linux-
+ BASE_DIR ?= $(CURDIR)/../../../../out
+ TARGET_DIR ?= $(BASE_DIR)/system
+ #CROSS_COMPILE ?= /extra/zyc/android6.0/prebuilts/gcc/linux-x86/arm/arm-eabi-4.6/bin/arm-eabi-
+diff --git a/CameraHal10_Release/CameraHal/testApp/Android.mk b/CameraHal10_Release/CameraHal/testApp/Android.mk
+index 6a91ec4..21eac7b 100644
+--- a/CameraHal10_Release/CameraHal/testApp/Android.mk
++++ b/CameraHal10_Release/CameraHal/testApp/Android.mk
+@@ -1,7 +1,7 @@
+ ifeq ($(IS_BUILD_TEST_APP),true)
+ 
+-SUPPORT_DRM_DISPLAY = false
+-SUPPORT_RK_DISPLAY = true
++SUPPORT_DRM_DISPLAY = true
++SUPPORT_RK_DISPLAY = false
+ 
+ #
+ # RockChip Camera HAL 
+diff --git a/CameraHal10_Release/CameraHal/testApp/drmDsp/bo.c b/CameraHal10_Release/CameraHal/testApp/drmDsp/bo.c
+index 1e54696..7f05f55 100644
+--- a/CameraHal10_Release/CameraHal/testApp/drmDsp/bo.c
++++ b/CameraHal10_Release/CameraHal/testApp/drmDsp/bo.c
+@@ -7,6 +7,8 @@
+ #include <errno.h>
+ #include <string.h>
+ 
++
++#define DRM_MODE_PROP_EXTENDED_TYPE      0x0000ffc0
+ #include <xf86drm.h>
+ #include <xf86drmMode.h>
+ #include <drm_fourcc.h>
+diff --git a/CameraHal10_Release/CameraHal/testApp/drmDsp/dev.c b/CameraHal10_Release/CameraHal/testApp/drmDsp/dev.c
+index 86bac79..790ccde 100644
+--- a/CameraHal10_Release/CameraHal/testApp/drmDsp/dev.c
++++ b/CameraHal10_Release/CameraHal/testApp/drmDsp/dev.c
+@@ -4,9 +4,11 @@
+ #include <unistd.h>
+ #include <string.h>
+ 
+-#include <drm.h>
+ #include <drm_fourcc.h>
+ #include <errno.h>
++
++#define DRM_MODE_PROP_EXTENDED_TYPE      0x0000ffc0
++
+ #include <xf86drm.h>
+ #include <xf86drmMode.h>
+ 
+diff --git a/CameraHal10_Release/CameraHal/testApp/drmDsp/dev.h b/CameraHal10_Release/CameraHal/testApp/drmDsp/dev.h
+index c09a0fd..d5558ab 100644
+--- a/CameraHal10_Release/CameraHal/testApp/drmDsp/dev.h
++++ b/CameraHal10_Release/CameraHal/testApp/drmDsp/dev.h
+@@ -2,6 +2,8 @@
+ #define __DEV_H_INCLUDED__
+ 
+ #include <stdint.h>
++#include <libdrm/drm.h>
++#include <libdrm/drm_mode.h>
+ #include <xf86drmMode.h>
+ 
+ struct sp_bo;
+diff --git a/CameraHal10_Release/CameraHal/testApp/drmDsp/modeset.c b/CameraHal10_Release/CameraHal/testApp/drmDsp/modeset.c
+index 3da7538..e6cc6bd 100644
+--- a/CameraHal10_Release/CameraHal/testApp/drmDsp/modeset.c
++++ b/CameraHal10_Release/CameraHal/testApp/drmDsp/modeset.c
+@@ -2,6 +2,8 @@
+ #include <stdlib.h>
+ #include <string.h>
+ 
++
++#define DRM_MODE_PROP_EXTENDED_TYPE      0x0000ffc0
+ #include <xf86drm.h>
+ #include <xf86drmMode.h>
+ #include <drm_fourcc.h>
+diff --git a/CameraHal10_Release/CameraHal/testApp/testHal.cpp b/CameraHal10_Release/CameraHal/testApp/testHal.cpp
+index ff189ee..fb59e9c 100755
+--- a/CameraHal10_Release/CameraHal/testApp/testHal.cpp
++++ b/CameraHal10_Release/CameraHal/testApp/testHal.cpp
+@@ -206,6 +206,7 @@ class CambufMpNotifierImp : public NewCameraBufferReadyNotifier {
+ static struct rk_cams_dev_info g_test_cam_infos;
+ #define RUNNINGTIME_MINUTE 3
+ #define RUNNINGTIME_MS (RUNNINGTIME_MINUTE*1000)
++#if 0
+ void testSofiaIsp(struct sofiaTestPara_s* para) {
+   int i = 0;
+   if (g_test_cam_infos.num_camers <= 0)
+@@ -473,6 +474,7 @@ USECASE_END:
+   ALOGD("destruct ISP dev......");
+   testIspDev.reset();
+ }
++#endif
+ 
+ static void testTunningClass() {
+   int i = 0;
+@@ -600,13 +602,13 @@ int main(int argc, const char* argv[]) {
+   if (argc > 1) {
+     int videoIndex = atoi(argv[1]);
+     int inputId = 0;
+-    ALOGD("video index is %d", videoIndex);
++    ALOGD("video index is %d, camera nums = %d", videoIndex, g_test_cam_infos.num_camers);
+     if (argc == 3)
+       inputId = atoi(argv[2]);
+     testCifDev(videoIndex, inputId);
+   } else {
+-    while (1)
+-      testSofiaIsp(&gSofiaTestPara);
++   // while (1)
++      //testSofiaIsp(&gSofiaTestPara);
+     //testTunningClass();
+   }
+ #ifdef USE_RK_DISPLAY
+diff --git a/cmake.sh b/cmake.sh
+index 928a41c..5a88102 100755
+--- a/cmake.sh
++++ b/cmake.sh
+@@ -13,7 +13,7 @@ bash_path=$(dirname $BASH_SOURCE)
+ cd $bash_path
+ bash_path=$(pwd)
+ cd ../..
+-source config/envsetup.sh
++source envsetup.sh
+ echo $bash_path
+ cd $bash_path
+ 

@@ -1,0 +1,1 @@
+ACTION=="change", ENV{CVBS_NAME}=="*RESOLUTION*", RUN+="/etc/rk-camera-uevent.sh $env{CVBS_NAME}"

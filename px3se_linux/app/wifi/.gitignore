@@ -1,0 +1,6 @@
+*.user
+*.user.*
+*.o
+Makefile
+wifi
+pkg-config_wrapper.sh

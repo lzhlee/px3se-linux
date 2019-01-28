@@ -1,0 +1,5 @@
+#!/bin/sh
+
+/usr/local/carplay/preset_top_layer &
+/usr/local/carplay/z-link.sh
+/usr/local/carplay/z-link

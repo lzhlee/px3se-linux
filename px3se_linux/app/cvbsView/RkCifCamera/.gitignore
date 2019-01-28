@@ -1,0 +1,4 @@
+Makefile
+pkg-config_wrapper.sh
+out
+*.o

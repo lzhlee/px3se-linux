@@ -1,0 +1,8 @@
+*.user
+*.user.*
+Makefile
+pkg-config_wrapper.sh
+cameraView
+cvbsView
+*.o
+moc_*

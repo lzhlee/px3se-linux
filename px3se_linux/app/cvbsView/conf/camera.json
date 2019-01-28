@@ -1,0 +1,6 @@
+    {
+        "app_name": "cvbsView",
+        "app_icon": "icon_cvbs.png",
+        "app_file": "cvbsView",
+	"i18n":"i18n.ini"
+    }

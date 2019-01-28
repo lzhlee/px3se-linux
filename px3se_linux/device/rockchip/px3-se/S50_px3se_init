@@ -1,0 +1,24 @@
+#!/bin/sh
+
+case "$1" in
+  start)
+	/sbin/insmod /usr/lib/gt9xx_module.ko
+	printf "start rkwifi module"
+	echo 1 >/sys/class/rkwifi/driver
+	rkrtkbt  ttyS0 &
+	# Mount debugfs
+	mount -t debugfs none /sys/kernel/debug
+	mkdir -p /data
+	resize2fs /dev/mmcblk0p7
+	;;
+  stop)
+	/sbin/rmmod gt9xx_module
+	printf "stop rkwifi module"
+	echo 0 >/sys/class/rkwifi/driver
+        ;;
+  *)
+        echo "Usage: $0 {start|stop}"
+        exit 1
+        ;;
+esac
+exit 0

@@ -1,0 +1,6 @@
+    {
+	"app_name": "carplay",
+	"app_icon": "icon_carplay.png",
+	"app_file": "carplay",
+	"exit_callback": "unz-link.sh"
+    }
