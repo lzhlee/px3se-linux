@@ -45,8 +45,8 @@
 #include "rk3128.dtsi"
 #include "rk3128-cif-sensor.dtsi"
 #include "px3se-sdk.dtsi"
-#include "lcd-lsl070nl01.dtsi"
-
+//#include "lcd-lsl070nl01.dtsi"
+#include "lcd-box.dtsi"
 / {
 	compatible = "rockchip,px3se-sdk","rockchip,rk3128";
 
@@ -112,7 +112,7 @@
 	gpio_det:gpio-det {
         compatible = "gpio-detection";
         status = "okay";
-
+/*
         car-reverse {
             gpios = <&gpio2 GPIO_B1 GPIO_ACTIVE_LOW>;
             linux,debounce-ms = <5>;
@@ -126,6 +126,7 @@
             label = "car-acc";
             gpio,wakeup;
         };
+*/
     };
 
 	vehicle {
@@ -170,11 +171,28 @@
 
 &fb {
 	rockchip,disp-mode = <ONE_DUAL>;
-	rockchip,uboot-logo-on = <1>;
+	rockchip,uboot-logo-on = <0>;
 };
 
+&gmac_clkin {
+        clock-frequency = <50000000>;
+};
 &gmac {
-	status = "disabled";
+        //pmu_regulator = "act_ldo5";
+        //pmu_enable_level = <1>; //1->HIGH, 0->LOW
+        //power-gpio = <&gpio0 GPIO_A6 GPIO_ACTIVE_HIGH>;
+        reset-gpio = <&gpio2 GPIO_B0 GPIO_ACTIVE_LOW>;
+        phy-mode = "rmii";
+        clock_in_out = "output";
+        tx_delay = <0x30>;
+        rx_delay = <0x10>;
+	phy-type = "external";
+        pinctrl-0 = <&gmac_rxdv &gmac_crs &gmac_mdio &gmac_txen &gmac_clk &gmac_rxer &gmac_rxd1 &gmac_rxd0 &gmac_txd1 &gmac_txd0 &gmac_mdc>;
+};
+
+
+&disp_timings {
+    native-mode = <&timing0>;
 };
 
 &rk_screen {
@@ -182,12 +200,12 @@
 };
 
 &lvds {
-	status = "okay";
+	status = "disabled";
 
 	pinctrl-names = "lcdc";
 	pinctrl-0 = <&lcdc0_lcdc_d>;
 };
-
+/*
 &lcdc {
 	status = "okay";
 
@@ -205,6 +223,13 @@
 			rockchip,delay = <10>;
 		};
 	};
+};
+*/
+
+&lcdc {
+    status = "okay";
+    //rockchip,fb-win-map = <FB0_WIN0_FB1_WIN1_FB2_WIN2>;
+    rockchip,fb-win-map = <FB_DEFAULT_ORDER>;
 };
 
 &hdmi {

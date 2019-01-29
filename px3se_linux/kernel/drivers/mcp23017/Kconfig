@@ -1,0 +1,26 @@
+#
+# MCP23017 subsystem configuration
+#
+
+menuconfig MCP23017
+	tristate "MCP23017 Driver"
+	depends on I2C
+	help
+	  This selects MultiMediaCard, Secure Digital and Secure
+	  Digital I/O support.
+
+	  If you want mcp23017 support, you should say Y here and
+	  also to your specific host controller driver.
+
+if MCP23017
+
+config MCP23017_GPIO
+	tristate "mcp23017 gpio functions"
+	help
+	  Platforms select gpiolib if they use this infrastructure
+	  for all their GPIOs, usually starting with ones integrated
+	  into SOC processors.
+	  Selecting this from the architecture code will cause the gpiolib
+	  code to always get built in.
+
+endif # MCP23017

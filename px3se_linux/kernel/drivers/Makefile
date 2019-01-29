@@ -166,3 +166,4 @@ obj-$(CONFIG_CORESIGHT)		+= coresight/
 obj-$(CONFIG_ANDROID)		+= android/
 obj-$(CONFIG_RK_FLASH)		+= rkflash/
 obj-y                           += rk_nand/
+obj-$(CONFIG_MCP23017)		+= mcp23017/

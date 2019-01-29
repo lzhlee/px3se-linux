@@ -51,6 +51,10 @@ static void option_release(struct usb_serial *serial);
 static int option_send_setup(struct usb_serial_port *port);
 static void option_instat_callback(struct urb *urb);
 
+/*BM817C*/
+#define BM817C_VENDOR_ID			0x2020
+#define BM817C_PRODUCT_ID			0x2040
+
 /* Vendor and product IDs */
 #define OPTION_VENDOR_ID			0x0AF0
 #define OPTION_PRODUCT_COLT			0x5000
@@ -1843,6 +1847,7 @@ static const struct usb_device_id option_ids[] = {
 	{ USB_DEVICE_INTERFACE_CLASS(0x2020, 0x4000, 0xff) },                /* OLICARD300 - MT6225 */
 	{ USB_DEVICE(INOVIA_VENDOR_ID, INOVIA_SEW858) },
 	{ USB_DEVICE(VIATELECOM_VENDOR_ID, VIATELECOM_PRODUCT_CDS7) },
+	{ USB_DEVICE(BM817C_VENDOR_ID, BM817C_PRODUCT_ID) },	     	     /*BM817C_VENDOR_ID*/
 	{ } /* Terminating entry */
 };
 MODULE_DEVICE_TABLE(usb, option_ids);
@@ -1945,6 +1950,11 @@ static int option_probe(struct usb_serial *serial,
 	    dev_desc->idProduct == cpu_to_le16(SAMSUNG_PRODUCT_GT_B3730) &&
 	    iface_desc->bInterfaceClass != USB_CLASS_CDC_DATA)
 		return -ENODEV;
+
+	if (dev_desc->idVendor == cpu_to_le16(BM817C_VENDOR_ID) &&
+           	dev_desc->idProduct == cpu_to_le16(BM817C_PRODUCT_ID) &&
+            iface_desc->bInterfaceNumber == 4)
+                return -ENODEV;
 
 	/* Store device id so we can use it during attach. */
 	usb_set_serial_data(serial, (void *)id);
